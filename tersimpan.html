@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Item Tersimpan - Roomi</title>
+    <link rel="stylesheet" href="bootstrap-5.3.8-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-light">
+
+    <header class="container py-3">
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="test.html">roomi</a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item"><a class="nav-link" href="test.html">Rooms</a></li>
+                        <li class="nav-item"><a class="nav-link" href="roommates.html">Roommates</a></li>
+                    </ul>
+                    <div id="auth-section"></div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container my-5">
+        <h1>Item Tersimpan Anda</h1>
+        <div id="saved-list" class="row row-cols-1 row-cols-md-3 g-4">
+             </div>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.onload = function() {
+            // Script untuk menampilkan tombol login/profil
+            const authSection = document.getElementById('auth-section');
+            const activeUserJSON = localStorage.getItem('activeUser');
+            if (activeUserJSON) {
+                const activeUser = JSON.parse(activeUserJSON);
+                authSection.innerHTML = `
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+                            <strong>${activeUser.nama}</strong>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><a class="dropdown-item" href="profil.html">Profil Saya</a></li>
+                            <li><a class="dropdown-item" href="tersimpan.html">Item Tersimpan</a></li>
+                            <li><a class="dropdown-item" href="riwayat.html">Riwayat Pemesanan</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-button">Logout</a></li>
+                        </ul>
+                    </div>`;
+                document.getElementById('logout-button').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    localStorage.removeItem('activeUser');
+                    window.location.reload();
+                });
+            } else {
+                authSection.innerHTML = `<a href="login.html" class="btn btn-outline-primary me-2">Login</a> <a href="registrasi.html" class="btn btn-primary">Daftar</a>`;
+            }
+
+            // Script untuk menampilkan item yang disimpan
+            const savedList = document.getElementById('saved-list');
+            const savedItems = JSON.parse(localStorage.getItem('savedItems')) || [];
+            if (savedItems.length === 0) {
+                savedList.innerHTML = '<p>Anda belum menyimpan item apapun.</p>';
+                return;
+            }
+            savedItems.forEach(roomId => {
+                const room = roomData.find(r => r.id === roomId);
+                if (room) {
+                    savedList.innerHTML += `
+                        <div class="col">
+                            <div class="card h-100">
+                                <img src="${room.image}" class="card-img-top" alt="${room.title}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${room.title}</h5>
+                                    <p class="card-text">$${room.price} / bulan</p>
+                                    <a href="detail-kamar.html?id=${room.id}" class="btn btn-primary">Lihat Detail</a>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+            });
+        };
+    </script>
+</body>
+</html>

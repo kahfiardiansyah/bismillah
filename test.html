@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roomi - Halaman Utama</title>
+    <link rel="stylesheet" href="bootstrap-5.3.8-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="container py-3">
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="test.html">roomi</a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item"><a class="nav-link active" href="test.html">Rooms</a></li>
+                        <li class="nav-item"><a class="nav-link" href="roommates.html">Roommates</a></li>
+                    </ul>
+                    <div id="auth-section"></div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="hero-section text-center py-5">
+             <h1>Find your people. <br> Find your place.</h1>
+             <p class="lead text-muted">Jelajahi ribuan kamar dan teman sekamar terverifikasi.</p>
+        </section>
+        <h2 id="welcome-message" class="my-4">Kamar Tersedia</h2>
+        
+        <section id="listings-section" class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4"></section>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.onload = function() {
+            const authSection = document.getElementById('auth-section');
+            const welcomeMessage = document.getElementById('welcome-message');
+            const activeUserJSON = localStorage.getItem('activeUser');
+
+            if (activeUserJSON) {
+                const activeUser = JSON.parse(activeUserJSON);
+                welcomeMessage.textContent = `Selamat Datang, ${activeUser.nama}!`;
+                authSection.innerHTML = `
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+                            <strong>${activeUser.nama}</strong>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><a class="dropdown-item" href="profil.html">Profil Saya</a></li>
+                            <li><a class="dropdown-item" href="tersimpan.html">Item Tersimpan</a></li>
+                            <li><a class="dropdown-item" href="riwayat.html">Riwayat Pemesanan</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-button">Logout</a></li>
+                        </ul>
+                    </div>`;
+                document.getElementById('logout-button').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    localStorage.removeItem('activeUser');
+                    alert('Anda telah logout.');
+                    window.location.reload();
+                });
+            } else {
+                authSection.innerHTML = `<a href="login.html" class="btn btn-outline-primary me-2">Login</a> <a href="registrasi.html" class="btn btn-primary">Daftar</a>`;
+            }
+            
+            displayRooms();
+        };
+
+        function displayRooms() {
+            const listingsSection = document.getElementById('listings-section');
+            if (!listingsSection) return;
+            listingsSection.innerHTML = ''; 
+
+            if (typeof roomData !== 'undefined') {
+                roomData.forEach(room => {
+                    const roomCardHTML = `
+                        <div class="col">
+                            <div class="card listing-card h-100">
+                                <a href="detail-kamar.html?id=${room.id}" class="text-decoration-none">
+                                    <img src="${room.image}" class="card-img" alt="${room.title}">
+                                    <div class="card-img-overlay">
+                                        <div class="user-info">
+                                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                                ${room.ownerInitial}
+                                            </div>
+                                            <div><h6 class="mb-0 text-white">${room.owner}</h6></div>
+                                        </div>
+                                        <div class="listing-info">
+                                            <p class="price text-white">$${room.price}</p>
+                                        </div>
+                                    </div>
+                                </a>
+                                <button onclick="saveRoom(${room.id})" class="btn btn-light bookmark-icon">
+                                    <i class="bi bi-bookmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    listingsSection.innerHTML += roomCardHTML;
+                });
+            } else {
+                listingsSection.innerHTML = "<p class='text-danger'>Gagal memuat data kamar. Pastikan file data.js terhubung dengan benar.</p>";
+            }
+        }
+
+        // ## PERUBAHAN UTAMA: Menambahkan kembali fungsi saveRoom() yang hilang ##
+        function saveRoom(roomId) {
+            if (!localStorage.getItem('activeUser')) {
+                alert('Anda harus login terlebih dahulu untuk menyimpan item!');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            let savedItems = JSON.parse(localStorage.getItem('savedItems')) || [];
+            
+            if (savedItems.includes(roomId)) {
+                alert('Item ini sudah ada di daftar tersimpan Anda.');
+                return;
+            }
+
+            savedItems.push(roomId);
+            localStorage.setItem('savedItems', JSON.stringify(savedItems));
+            alert('Kamar berhasil disimpan!');
+        }
+    </script>
+</body>
+</html>

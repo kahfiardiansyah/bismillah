@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Judul Halaman - Roomi</title>
+
+    <link rel="stylesheet" href="bootstrap-5.3.8-dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-light">
+    <main class="container my-5">
+        <div id="room-detail-content" class="row">
+            <div class="col text-center">
+                <p>Memuat data kamar...</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="data.js"></script>
+    <script>
+        window.onload = function() {
+            const content = document.getElementById('room-detail-content');
+            
+            // 1. Ambil 'id' dari URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomId = parseInt(urlParams.get('id')); // Ubah jadi angka
+
+            // 2. Cari data kamar yang cocok di database palsu kita
+            const room = roomData.find(r => r.id === roomId);
+
+            if (room) {
+                // 3. Jika kamar ditemukan, tampilkan detailnya
+                let facilitiesHTML = '';
+                room.facilities.forEach(f => {
+                    facilitiesHTML += `<li class="list-group-item"><i class="bi bi-check-circle-fill text-success"></i> ${f}</li>`;
+                });
+
+                content.innerHTML = `
+                    <div class="col-lg-7">
+                        <img src="${room.image}" class="img-fluid rounded shadow-sm w-100" alt="${room.title}">
+                    </div>
+                    <div class="col-lg-5">
+                        <h2>${room.title}</h2>
+                        <p class="text-muted">Disewakan oleh: ${room.owner}</p>
+                        <h3 class="my-3">$${room.price} <span class="fs-6 fw-normal text-muted">/ bulan</span></h3>
+                        <p>${room.description}</p>
+                        
+                        <h5 class="mt-4">Fasilitas</h5>
+                        <ul class="list-group list-group-flush">${facilitiesHTML}</ul>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button onclick="bookRoom(${room.id})" class="btn btn-primary btn-lg">Pesan Sekarang</button>
+                            <a href="test.html" class="btn btn-outline-secondary">Kembali ke Daftar</a>
+                        </div>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = '<p class="text-center">Kamar tidak ditemukan.</p>';
+            }
+        };
+
+        function bookRoom(roomId) {
+            if (!localStorage.getItem('activeUser')) {
+                alert('Anda harus login terlebih dahulu untuk memesan!');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            let bookingHistory = JSON.parse(localStorage.getItem('bookingHistory')) || [];
+            
+            const newBooking = {
+                roomId: roomId,
+                bookingDate: new Date().toLocaleDateString('id-ID') // Format tanggal Indonesia
+            };
+
+            bookingHistory.push(newBooking);
+            localStorage.setItem('bookingHistory', JSON.stringify(bookingHistory));
+            alert('Pemesanan berhasil! Cek riwayat pemesanan Anda.');
+            window.location.href = 'riwayat.html';
+        }
+    </script>
+</body>
+</html>
